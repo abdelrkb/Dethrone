@@ -13,11 +13,15 @@ public class Enemy : MonoBehaviour
     protected Transform player;
     protected NavMeshAgent agent;
     protected Renderer rend;
+    protected Animator anim;
+    protected EnemyHitbox hitbox;
     protected Color originalColor;
-    protected float lastAttackTime = 0f;
+    protected float lastAttackTime = -999f;
+    protected float attackDuration = 2f;
     protected float timeEnteredStoppingDistance = -1f;
-    protected const float DELAY_BEFORE_FIRST_ATTACK = 1f;
+    protected const float DELAY_BEFORE_FIRST_ATTACK = 0f;
     protected bool isFrozen = false;
+    protected bool isAttacking = false;
 
     protected virtual void Start()
     {
@@ -29,11 +33,17 @@ public class Enemy : MonoBehaviour
             agent.stoppingDistance = stoppingDistance;
         }
 
-        rend = GetComponent<Renderer>();
+        rend = GetComponentInChildren<Renderer>();
         if (rend != null)
         {
             originalColor = rend.material.color;
         }
+
+        anim = GetComponentInChildren<Animator>();
+        if (anim != null) anim.applyRootMotion = false;
+
+        hitbox = GetComponentInChildren<EnemyHitbox>();
+        if (hitbox != null) hitbox.Init(this);
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
@@ -44,22 +54,32 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Update()
     {
-        if (agent != null && agent.isOnNavMesh && player != null && !isFrozen)
+        if (player != null && isAttacking)
         {
+            Vector3 direction = (player.position - transform.position);
+            direction.y = 0f;
+            if (direction != Vector3.zero)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction), Time.deltaTime * 10f);
+
+            if (Time.time >= lastAttackTime + attackDuration)
+                OnAttackEnd();
+        }
+
+        if (agent != null && agent.isOnNavMesh && player != null && !isFrozen && !isAttacking)
+        {
+            agent.isStopped = false;
             agent.speed = moveSpeed;
             agent.SetDestination(player.position);
 
             // Attaquer si le joueur est à portée
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            if (distanceToPlayer <= stoppingDistance)
+            if (distanceToPlayer <= stoppingDistance + 1f)
             {
-                // Tracker le temps depuis que l'ennemi est devenu proche
                 if (timeEnteredStoppingDistance < 0)
                 {
                     timeEnteredStoppingDistance = Time.time;
                 }
 
-                // Attaquer après le délai initial ET respecter le cooldown
                 if (Time.time >= timeEnteredStoppingDistance + DELAY_BEFORE_FIRST_ATTACK &&
                     Time.time >= lastAttackTime + attackCooldown)
                 {
@@ -69,7 +89,6 @@ public class Enemy : MonoBehaviour
             }
             else
             {
-                // Réinitialiser le délai si le joueur s'éloigne
                 timeEnteredStoppingDistance = -1f;
             }
         }
@@ -99,14 +118,35 @@ public class Enemy : MonoBehaviour
     /// </summary>
     protected virtual void AttackPlayer()
     {
-        if (isFrozen) return; // Ne pas attaquer si gelé
+        if (isFrozen) return;
 
-        PlayerStats playerStats = player.GetComponent<PlayerStats>();
-        if (playerStats != null)
+        if (player != null)
         {
-            playerStats.TakeDamage(damage);
-            Debug.Log($"{gameObject.name} inflige {damage} dégâts au joueur!");
+            Vector3 direction = (player.position - transform.position);
+            direction.y = 0f;
+            if (direction != Vector3.zero)
+                transform.rotation = Quaternion.LookRotation(direction);
         }
+
+        isAttacking = true;
+        if (agent != null) agent.isStopped = true;
+        if (anim != null) anim.SetTrigger("attack");
+    }
+
+    public virtual void EnableHitbox()
+    {
+        if (hitbox != null) hitbox.EnableHitbox();
+    }
+
+    public virtual void DisableHitbox()
+    {
+        if (hitbox != null) hitbox.DisableHitbox();
+    }
+
+    public virtual void OnAttackEnd()
+    {
+        isAttacking = false;
+        if (agent != null) agent.isStopped = false;
     }
 
     protected virtual void FlashRed()
@@ -128,8 +168,20 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Die()
     {
+        Debug.Log($"[Enemy] Die() appelé — anim={anim}, agent={agent}");
+
+        if (anim != null)
+        {
+            anim.SetBool("isDead", true);
+            if (agent != null) agent.enabled = false;
+            Destroy(gameObject, 2f);
+        }
+        else
+        {
+            Debug.LogWarning("[Enemy] Pas d'Animator trouvé — destruction immédiate sans anim");
+            Destroy(gameObject);
+        }
         WaveManager.Instance.EnemyKilled();
-        Destroy(gameObject);
     }
 
     public int GetHealth()

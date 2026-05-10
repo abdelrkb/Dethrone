@@ -16,25 +16,25 @@ public class PlayerAttack : MonoBehaviour
     private Animator animator;
     private PlayerStats playerStats;
     private Weapon currentWeapon;
+    private PlayerHitbox hitbox;
 
     void Start()
     {
         animator = GetComponent<Animator>();
         playerStats = GetComponent<PlayerStats>();
-        
-        // Initialiser avec l'épée avec les assets de l'Inspector
+
+        hitbox = GetComponentInChildren<PlayerHitbox>();
+        if (hitbox != null) hitbox.Init(this);
+
         EquipWeapon(new Sword(swordFbx, swordImage));
     }
 
     void Update()
     {
-        if (Input.GetMouseButtonDown(0)) // clic gauche
+        if (Input.GetMouseButtonDown(0))
         {
             if (animator != null)
-            {
                 animator.SetTrigger("Attack");
-            }
-            Attack();
         }
     }
 
@@ -47,32 +47,14 @@ public class PlayerAttack : MonoBehaviour
         );
     }
 
-    void Attack()
+    public void EnableHitbox()
     {
-        if (currentWeapon == null)
-        {
-            Debug.LogWarning("Aucune arme équipée!");
-            return;
-        }
+        if (hitbox != null) hitbox.EnableHitbox();
+    }
 
-        // Calculer les dégâts totaux : force du joueur + dégâts de l'arme
-        int totalDamage = playerStats.strength + currentWeapon.damage;
-
-        Collider[] hits = Physics.OverlapSphere(
-            transform.position + transform.forward * 1.5f,
-            range,
-            enemyLayer
-        );
-
-        foreach (Collider hit in hits)
-        {
-            Enemy enemy = hit.GetComponent<Enemy>();
-            if (enemy != null)
-            {
-                enemy.TakeDamage(totalDamage);
-                Debug.Log($"Dégâts infligés: {totalDamage} ({playerStats.strength} force + {currentWeapon.damage} arme)");
-            }
-        }
+    public void DisableHitbox()
+    {
+        if (hitbox != null) hitbox.DisableHitbox();
     }
 
     /// <summary>
@@ -90,10 +72,10 @@ public class PlayerAttack : MonoBehaviour
             Transform weaponHolder = rightHand.Find("WeaponHolder");
             if (weaponHolder != null)
             {
-                // Supprimer l'ancienne arme affichée
                 foreach (Transform child in weaponHolder)
                 {
-                    Destroy(child.gameObject);
+                    if (child.GetComponent<PlayerHitbox>() == null)
+                        Destroy(child.gameObject);
                 }
                 
                 // Afficher le nouveau fbx si disponible
@@ -102,7 +84,7 @@ public class PlayerAttack : MonoBehaviour
                     GameObject weaponInstance = Instantiate(weapon.fbxPrefab, weaponHolder);
                     weaponInstance.transform.localPosition = Vector3.zero;
                     weaponInstance.transform.localRotation = Quaternion.identity;
-                    Debug.Log($"Modèle de {weapon.name} affiché dans le WeaponHolder");
+
                 }
             }
             else

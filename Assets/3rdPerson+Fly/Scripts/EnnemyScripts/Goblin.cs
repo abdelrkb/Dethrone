@@ -9,7 +9,7 @@ public class Goblin : Enemy
         currentHealth = maxHealth;
         damage = 5;
         moveSpeed = 3f;
-        stoppingDistance = 5f;
+        stoppingDistance = 1.2f;
         attackCooldown = 1.5f;
 
         // Appeler la méthode Start de la classe parente
