@@ -5,7 +5,7 @@ public class Goblin : Enemy
     protected override void Start()
     {
         // Définir les statistiques du Goblin
-        maxHealth = 20;
+        maxHealth = 35;
         currentHealth = maxHealth;
         damage = 5;
         moveSpeed = 3f;

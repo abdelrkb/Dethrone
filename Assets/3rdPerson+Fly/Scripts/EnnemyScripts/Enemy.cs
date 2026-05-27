@@ -13,11 +13,13 @@ public class Enemy : MonoBehaviour
     protected Transform player;
     protected NavMeshAgent agent;
     protected Renderer rend;
+    protected Renderer[] allRenderers;
     protected Animator anim;
     protected EnemyHitbox hitbox;
+    protected EnemyHealthBar healthBar;
     protected Color originalColor;
     protected float lastAttackTime = -999f;
-    protected float attackDuration = 2f;
+    protected float attackDuration = 3.833f;
     protected float timeEnteredStoppingDistance = -1f;
     protected const float DELAY_BEFORE_FIRST_ATTACK = 0f;
     protected bool isFrozen = false;
@@ -34,6 +36,7 @@ public class Enemy : MonoBehaviour
         }
 
         rend = GetComponentInChildren<Renderer>();
+        allRenderers = GetComponentsInChildren<Renderer>();
         if (rend != null)
         {
             originalColor = rend.material.color;
@@ -44,6 +47,9 @@ public class Enemy : MonoBehaviour
 
         hitbox = GetComponentInChildren<EnemyHitbox>();
         if (hitbox != null) hitbox.Init(this);
+
+        healthBar = GetComponentInChildren<EnemyHealthBar>();
+        if (healthBar != null) healthBar.Init(maxHealth);
 
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null)
@@ -107,6 +113,8 @@ public class Enemy : MonoBehaviour
         currentHealth -= amount;
         FlashRed();
 
+        if (healthBar != null) healthBar.SetHealth(currentHealth, maxHealth);
+
         if (currentHealth <= 0)
         {
             Die();
@@ -151,18 +159,20 @@ public class Enemy : MonoBehaviour
 
     protected virtual void FlashRed()
     {
-        if (rend != null)
+        if (allRenderers != null)
         {
-            rend.material.color = Color.red;
+            foreach (Renderer r in allRenderers)
+                r.material.color = Color.red;
             Invoke(nameof(ResetColor), 0.2f);
         }
     }
 
     protected virtual void ResetColor()
     {
-        if (rend != null)
+        if (allRenderers != null)
         {
-            rend.material.color = originalColor;
+            foreach (Renderer r in allRenderers)
+                r.material.color = originalColor;
         }
     }
 
