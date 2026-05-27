@@ -73,7 +73,7 @@ public class Enemy : MonoBehaviour
 
             // Attaquer si le joueur est à portée
             float distanceToPlayer = Vector3.Distance(transform.position, player.position);
-            if (distanceToPlayer <= stoppingDistance + 1f)
+            if (distanceToPlayer <= stoppingDistance)
             {
                 if (timeEnteredStoppingDistance < 0)
                 {
