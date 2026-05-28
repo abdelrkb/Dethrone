@@ -45,7 +45,7 @@ public class WaveManager : MonoBehaviour
         waveText.text = "Wave : " + currentWave;
 
         // À la vague 10, spawner le boss uniquement
-        if (currentWave == 2)
+        if (currentWave == 10)
         {
             enemiesAlive = 1;
             StartCoroutine(SpawnBossWave());
@@ -74,7 +74,7 @@ public class WaveManager : MonoBehaviour
             waveInProgress = false;
             
             // Vérifier si le boss vient d'être vaincu (wave 10)
-            if (currentWave == 2)
+            if (currentWave == 10)
             {
                 GameWon();
             }

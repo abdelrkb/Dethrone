@@ -24,9 +24,15 @@ public class PlayerStats : MonoBehaviour
     public Image[] skillImages = new Image[3]; // Images pour C, V, B
     public TMP_Text[] skillCooldownTexts = new TMP_Text[3]; // Affichage cooldown + lettres (C, V, B)
 
+    void Awake()
+    {
+        TryResolveHUDReferences();
+    }
+
     void Start()
     {
         currentHealth = maxHealth;
+        TryResolveHUDReferences();
         UpdateHUD();
 
         playerRenderer = GetComponentInChildren<Renderer>();
@@ -78,10 +84,16 @@ public class PlayerStats : MonoBehaviour
         float hpPercent = (float)currentHealth / maxHealth;
 
         // Health bar (scale X)
-        healthBar.localScale = new Vector3(hpPercent, 1, 1);
+        if (healthBar != null)
+            healthBar.localScale = new Vector3(hpPercent, 1, 1);
+        else
+            Debug.LogWarning("[PlayerStats] healthBar non assignée. Assigne 'Health_Fill' dans l'inspector.");
 
-        strengthText.text = "Strength : " + strength;
-        speedText.text = "Speed : " + speed;
+        if (strengthText != null)
+            strengthText.text = "Strength : " + strength;
+
+        if (speedText != null)
+            speedText.text = "Speed : " + speed;
     }
 
     public void UpdateHUDDirectly()
@@ -275,6 +287,16 @@ public class PlayerStats : MonoBehaviour
                     skillCooldownTexts[i].text = keyLabels[i];
                 }
             }
+        }
+    }
+
+    private void TryResolveHUDReferences()
+    {
+        if (healthBar == null)
+        {
+            GameObject healthFillObj = GameObject.Find("Health_Fill");
+            if (healthFillObj != null)
+                healthBar = healthFillObj.transform;
         }
     }
 }
