@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -13,6 +14,10 @@ public class PlayerStats : MonoBehaviour
     public Transform healthBar; // Health_Fill
     public TMP_Text strengthText;
     public TMP_Text speedText;
+
+    private Renderer playerRenderer;
+    private Color originalColor;
+    private Color originalEmission;
     
     // Compétences
     private Skill[] skills = new Skill[3];
@@ -23,6 +28,13 @@ public class PlayerStats : MonoBehaviour
     {
         currentHealth = maxHealth;
         UpdateHUD();
+
+        playerRenderer = GetComponentInChildren<Renderer>();
+        if (playerRenderer != null)
+        {
+            originalColor = playerRenderer.material.color;
+            originalEmission = playerRenderer.material.GetColor("_EmissionColor");
+        }
         
         // Initialiser les textes des touches
         string[] keyLabels = { "C", "V", "B" };
@@ -83,12 +95,50 @@ public class PlayerStats : MonoBehaviour
         currentHealth = Mathf.Max(currentHealth, 0);
 
         UpdateHUD();
+        FlashRed();
 
-        // Vérifier si le joueur est mort
         if (currentHealth <= 0)
         {
             Die();
         }
+    }
+
+    private void FlashRed()
+    {
+        if (playerRenderer == null) return;
+        StopCoroutine(nameof(FlashRoutine));
+        StartCoroutine(nameof(FlashRoutine));
+    }
+
+    private IEnumerator FlashRoutine()
+    {
+        playerRenderer.material.EnableKeyword("_EMISSION");
+
+        float fadeIn = 0.08f;
+        float fadeOut = 0.35f;
+
+        // Montée rapide vers le rouge
+        float t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / fadeIn;
+            playerRenderer.material.color = Color.Lerp(originalColor, Color.red, t);
+            playerRenderer.material.SetColor("_EmissionColor", Color.Lerp(originalEmission, Color.red * 4f, t));
+            yield return null;
+        }
+
+        // Descente douce vers la couleur d'origine
+        t = 0f;
+        while (t < 1f)
+        {
+            t += Time.deltaTime / fadeOut;
+            playerRenderer.material.color = Color.Lerp(Color.red, originalColor, t);
+            playerRenderer.material.SetColor("_EmissionColor", Color.Lerp(Color.red * 4f, originalEmission, t));
+            yield return null;
+        }
+
+        playerRenderer.material.color = originalColor;
+        playerRenderer.material.SetColor("_EmissionColor", originalEmission);
     }
     
     /// <summary>
