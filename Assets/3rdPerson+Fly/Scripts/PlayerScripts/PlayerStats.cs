@@ -154,19 +154,36 @@ public class PlayerStats : MonoBehaviour
     }
     
     /// <summary>
-    /// Gère la mort du joueur
+    /// Gère la mort du joueur : affiche l'écran de défaite
     /// </summary>
     private void Die()
     {
-        Debug.Log("Le joueur est mort! Redémarrage à la wave 1...");
-        
+        Debug.Log("Le joueur est mort!");
+
+        if (DefeatScreen.Instance != null)
+        {
+            DefeatScreen.Instance.Show(this);
+        }
+        else
+        {
+            // Fallback si DefeatScreen absent
+            ExecuteRetry();
+        }
+    }
+
+    /// <summary>
+    /// Appelé par DefeatScreen quand le joueur clique Retry.
+    /// Perd un skill, réinitialise la santé et repart à la wave 1.
+    /// </summary>
+    public void ExecuteRetry()
+    {
         // Perdre un skill aléatoire
         LoseRandomSkill();
-        
+
         // Réinitialiser la santé
         currentHealth = maxHealth;
         UpdateHUD();
-        
+
         // Redémarrer à la wave 1
         WaveManager.Instance.RestartGame();
     }
@@ -298,5 +315,36 @@ public class PlayerStats : MonoBehaviour
             if (healthFillObj != null)
                 healthBar = healthFillObj.transform;
         }
+    }
+
+    /// <summary>
+    /// Remet le joueur à zéro complet (après victoire) :
+    /// stats de base, HP max, tous les skills vidés, arme de base réequipée.
+    /// </summary>
+    public void FullReset()
+    {
+        // Stats de base
+        strength = 0;
+        speed = 1;
+        maxHealth = 100;
+        currentHealth = maxHealth;
+
+        // Vider tous les skills
+        string[] keyLabels = { "C", "V", "B" };
+        for (int i = 0; i < 3; i++)
+        {
+            skills[i] = null;
+            if (skillImages[i] != null)
+                skillImages[i].sprite = null;
+            if (skillCooldownTexts[i] != null)
+                skillCooldownTexts[i].text = keyLabels[i];
+        }
+
+        UpdateHUD();
+
+        // Réequiper l'arme de base
+        PlayerAttack playerAttack = GetComponent<PlayerAttack>();
+        if (playerAttack != null)
+            playerAttack.FullReset();
     }
 }

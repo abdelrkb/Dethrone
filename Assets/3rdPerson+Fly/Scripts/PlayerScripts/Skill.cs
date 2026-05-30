@@ -9,14 +9,23 @@ public class Skill
     public float cooldown; // en secondes
     public Sprite image; // Image UI pour les upgrades (grande version)
     public Sprite miniImage; // Image UI pour les slots HUD (petite version)
+
+    /// <summary>Son joué lors de l'activation du skill (optionnel)</summary>
+    public AudioClip sfx;
+    /// <summary>Si true, la musique est mise en pause pendant la durée du SFX</summary>
+    public bool cutMusic = false;
+
     private float lastUsedTime = -float.MaxValue;
 
-    public Skill(string name, float cooldown, Sprite image = null, Sprite miniImage = null)
+    public Skill(string name, float cooldown, Sprite image = null, Sprite miniImage = null,
+                 AudioClip sfx = null, bool cutMusic = false)
     {
         this.name = name;
         this.cooldown = cooldown;
         this.image = image;
         this.miniImage = miniImage;
+        this.sfx = sfx;
+        this.cutMusic = cutMusic;
     }
 
     /// <summary>
@@ -36,6 +45,8 @@ public class Skill
         if (CanUse())
         {
             lastUsedTime = Time.time;
+            if (sfx != null && MusicManager.Instance != null)
+                MusicManager.Instance.PlaySkillSFX(sfx, cutMusic);
             Debug.Log($"Compétence {name} applique son effet sur {target.name}");
         }
         else

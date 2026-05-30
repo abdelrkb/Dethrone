@@ -48,11 +48,13 @@ public class WaveManager : MonoBehaviour
         if (currentWave == 10)
         {
             enemiesAlive = 1;
+            if (MusicManager.Instance != null) MusicManager.Instance.PlayBossMusic();
             StartCoroutine(SpawnBossWave());
         }
         else
         {
             enemiesAlive = enemiesPerWave;
+            if (MusicManager.Instance != null) MusicManager.Instance.PlayGameplayMusic();
             StartCoroutine(SpawnWave());
         }
     }
@@ -156,9 +158,12 @@ public void GameWon()
     Debug.Log("You have defeated the Boss! Congratulations!");
     
     waveText.text = "VICTORY!";
-    
-    // Arrêter le spawn d'ennemis et désactiver la progression
-    Time.timeScale = 0f; // Mettre le jeu en pause (optionnel)
+    if (MusicManager.Instance != null) MusicManager.Instance.PlayVictoryMusic();
+
+    if (VictoryScreen.Instance != null)
+        VictoryScreen.Instance.Show();
+    else
+        Time.timeScale = 0f;
 }
 
 /// <summary>
@@ -168,6 +173,7 @@ public void RestartGame()
 {
     currentWave = 1;
     waveInProgress = false;
+    if (MusicManager.Instance != null) MusicManager.Instance.PlayGameplayMusic();
     
     // Détruire tous les ennemis actuels
     Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);

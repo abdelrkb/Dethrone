@@ -10,7 +10,8 @@ public class ZaWarudoSkill : Skill
     private const float FREEZE_DURATION = 10f; // Durée d'arrêt en secondes
     private const float COOLDOWN = 60f; // Cooldown en secondes
 
-    public ZaWarudoSkill(Sprite image = null, Sprite miniImage = null) : base("ZA WARUDO", COOLDOWN, image, miniImage)
+    public ZaWarudoSkill(Sprite image = null, Sprite miniImage = null, AudioClip sfx = null)
+        : base("ZA WARUDO", COOLDOWN, image, miniImage, sfx: sfx, cutMusic: true)
     {
     }
 
@@ -50,7 +51,7 @@ public class ZaWarudoSkill : Skill
 
     IEnumerator ResumeEnemiesAfterDelay(float delay)
     {
-        yield return new WaitForSecondsRealtime(delay);
+        yield return new WaitForSeconds(delay);
 
         // Dégeler tous les ennemis
         Enemy[] enemies = Object.FindObjectsByType<Enemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);

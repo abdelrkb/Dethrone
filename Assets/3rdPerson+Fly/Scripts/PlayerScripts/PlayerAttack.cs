@@ -12,6 +12,7 @@ public class PlayerAttack : MonoBehaviour
     public Sprite superSonicImage; // Drag l'image de Super Sonic ici
     public Sprite zaWarudoImage; // Drag l'image de ZA WARUDO ici (grande version)
     public Sprite zaWarudoMiniImage; // Drag la mini image de ZA WARUDO ici (pour HUD)
+    public AudioClip zaWarudoSFX; // Drag le SFX de ZA WARUDO ici
     
     private Animator animator;
     private PlayerStats playerStats;
@@ -118,5 +119,13 @@ public class PlayerAttack : MonoBehaviour
     {
         if (currentWeapon == null) return 0;
         return playerStats.strength + currentWeapon.damage;
+    }
+
+    /// <summary>
+    /// Rééquipe l'arme de base (appelé après une victoire)
+    /// </summary>
+    public void FullReset()
+    {
+        EquipWeapon(new Sword(swordFbx, swordImage));
     }
 }

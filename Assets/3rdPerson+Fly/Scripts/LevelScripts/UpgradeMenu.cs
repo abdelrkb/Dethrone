@@ -169,7 +169,7 @@ public class UpgradeMenu : MonoBehaviour
         switch (randomChoice)
         {
             case 0:
-                randomSkill = new ZaWarudoSkill(playerAttack.zaWarudoImage, playerAttack.zaWarudoMiniImage);
+                randomSkill = new ZaWarudoSkill(playerAttack.zaWarudoImage, playerAttack.zaWarudoMiniImage, playerAttack.zaWarudoSFX);
                 break;
         }
 
