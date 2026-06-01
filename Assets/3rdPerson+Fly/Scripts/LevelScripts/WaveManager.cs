@@ -149,6 +149,14 @@ public void StartNextWave()
 }
 
 /// <summary>
+/// Ajoute des ennemis supplémentaires au compteur de la vague en cours (ex: Mystery Box)
+/// </summary>
+public void AddEnemies(int count)
+{
+    enemiesAlive += count;
+}
+
+/// <summary>
 /// Appelé quand le boss est vaincu
 /// </summary>
 public void GameWon()

@@ -18,11 +18,23 @@ public class PlayerStats : MonoBehaviour
     private Renderer playerRenderer;
     private Color originalColor;
     private Color originalEmission;
+    private bool isInvincible = false;
+    private Coroutine starCoroutine;
+    private bool isRaged = false;
+    private Coroutine rageCoroutine;
+    private ParticleSystem rageParticles;
     
     // Compétences
     private Skill[] skills = new Skill[3];
     public Image[] skillImages = new Image[3]; // Images pour C, V, B
     public TMP_Text[] skillCooldownTexts = new TMP_Text[3]; // Affichage cooldown + lettres (C, V, B)
+    private float skillInputBlockedUntil = 0f;
+
+    /// <summary>Bloque les inputs skills pendant <duration> secondes (temps réel).</summary>
+    public void BlockSkillInput(float duration)
+    {
+        skillInputBlockedUntil = Time.unscaledTime + duration;
+    }
 
     void Awake()
     {
@@ -62,17 +74,15 @@ public class PlayerStats : MonoBehaviour
         }
         
         // Gérer les inputs des compétences
-        if (Input.GetKeyDown(KeyCode.C) && skills[0] != null)
+        bool menuWaiting = UpgradeMenu.Instance != null && UpgradeMenu.Instance.IsWaitingForSlotSelection;
+        if (!menuWaiting && Time.unscaledTime >= skillInputBlockedUntil)
         {
-            UseSkill(0);
-        }
-        if (Input.GetKeyDown(KeyCode.V) && skills[1] != null)
-        {
-            UseSkill(1);
-        }
-        if (Input.GetKeyDown(KeyCode.B) && skills[2] != null)
-        {
-            UseSkill(2);
+            if (Input.GetKeyDown(KeyCode.C) && skills[0] != null)
+                UseSkill(0);
+            if (Input.GetKeyDown(KeyCode.V) && skills[1] != null)
+                UseSkill(1);
+            if (Input.GetKeyDown(KeyCode.B) && skills[2] != null)
+                UseSkill(2);
         }
         
         // Mettre à jour l'affichage des cooldowns
@@ -103,6 +113,8 @@ public class PlayerStats : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        if (isInvincible) return;
+
         currentHealth -= damage;
         currentHealth = Mathf.Max(currentHealth, 0);
 
@@ -149,10 +161,23 @@ public class PlayerStats : MonoBehaviour
             yield return null;
         }
 
-        playerRenderer.material.color = originalColor;
-        playerRenderer.material.SetColor("_EmissionColor", originalEmission);
+        Color flashRestore = isRaged ? new Color(0.6f, 0f, 1f) : originalColor;
+        Color flashRestoreEmission = isRaged ? new Color(0.6f, 0f, 1f) * 2f : originalEmission;
+        playerRenderer.material.color = flashRestore;
+        playerRenderer.material.SetColor("_EmissionColor", flashRestoreEmission);
     }
-    
+
+    public void KillInstant()
+    {
+        currentHealth = 0;
+        UpdateHUD();
+
+        if (DefeatScreen.Instance != null)
+            DefeatScreen.Instance.Show(this);
+        else
+            ExecuteRetry();
+    }
+
     /// <summary>
     /// Gère la mort du joueur : affiche l'écran de défaite
     /// </summary>
@@ -266,9 +291,9 @@ public class PlayerStats : MonoBehaviour
     {
         if (skills[slotIndex] != null && skills[slotIndex].CanUse())
         {
-            GameObject player = gameObject;
-            skills[slotIndex].Effect(player);
-            Debug.Log($"Compétence utilisée: {skills[slotIndex].name}");
+            Skill skill = skills[slotIndex];
+            skill.Effect(gameObject);
+            Debug.Log($"Compétence utilisée: {skill.name}");
         }
     }
     
@@ -307,8 +332,66 @@ public class PlayerStats : MonoBehaviour
         }
     }
 
-    private void TryResolveHUDReferences()
+    /// <summary>
+    /// Active l'invincibilité Star pendant une durée donnée avec clignotement multicolore.
+    /// </summary>
+    public void ActivateStar(float duration)
     {
+        if (starCoroutine != null) StopCoroutine(starCoroutine);
+        starCoroutine = StartCoroutine(StarRoutine(duration));
+    }
+
+    private IEnumerator StarRoutine(float duration)
+    {
+        isInvincible = true;
+
+        if (playerRenderer != null)
+            playerRenderer.material.EnableKeyword("_EMISSION");
+
+        Color[] rainbow = {
+            Color.red, new Color(1f, 0.5f, 0f), Color.yellow,
+            Color.green, Color.cyan, Color.blue, Color.magenta
+        };
+
+        float elapsed = 0f;
+        int colorIndex = 0;
+        float colorInterval = 0.12f;
+        float nextColorTime = 0f;
+
+        while (elapsed < duration)
+        {
+            elapsed += Time.deltaTime;
+
+            if (elapsed >= nextColorTime)
+            {
+                Color c = rainbow[colorIndex % rainbow.Length];
+                if (playerRenderer != null)
+                {
+                    playerRenderer.material.color = c;
+                    playerRenderer.material.SetColor("_EmissionColor", c * 3f);
+                }
+                colorIndex++;
+                nextColorTime = elapsed + colorInterval;
+            }
+
+            yield return null;
+        }
+
+        // Restaurer couleurs d'origine
+        if (playerRenderer != null)
+        {
+            playerRenderer.material.color = originalColor;
+            playerRenderer.material.SetColor("_EmissionColor", originalEmission);
+        }
+
+        isInvincible = false;
+
+        // Arrêter le SFX de l'étoile et reprendre la musique
+        if (MusicManager.Instance != null)
+            MusicManager.Instance.StopSFXAndResumeMusic();
+    }
+
+    private void TryResolveHUDReferences()    {
         if (healthBar == null)
         {
             GameObject healthFillObj = GameObject.Find("Health_Fill");
@@ -342,9 +425,131 @@ public class PlayerStats : MonoBehaviour
 
         UpdateHUD();
 
-        // Réequiper l'arme de base
+        // Réequipper l'arme de base
         PlayerAttack playerAttack = GetComponent<PlayerAttack>();
         if (playerAttack != null)
             playerAttack.FullReset();
+    }
+    /// <summary>
+    /// Active le Rage Spell pendant une durée donnée.
+    /// Double vitesse + force du joueur et des ennemis, couleur violette + particules.
+    /// </summary>
+    public void ActivateRageSpell(float duration)
+    {
+        if (rageCoroutine != null) StopCoroutine(rageCoroutine);
+        rageCoroutine = StartCoroutine(RageSpellRoutine(duration));
+    }
+
+    private IEnumerator RageSpellRoutine(float duration)
+    {
+        isRaged = true;
+
+        // Doubler force et vitesse du joueur
+        int origStrength = strength;
+        int origSpeed = speed;
+        strength = origStrength * 2;
+        speed = origSpeed * 2;
+        UpdateHUD();
+
+        // Doubler la vitesse physique (MoveBehaviour)
+        MoveBehaviour moveBehaviour = GetComponent<MoveBehaviour>();
+        float origWalk = 0f, origRun = 0f, origSprint = 0f;
+        if (moveBehaviour != null)
+        {
+            origWalk   = moveBehaviour.walkSpeed;
+            origRun    = moveBehaviour.runSpeed;
+            origSprint = moveBehaviour.sprintSpeed;
+            moveBehaviour.walkSpeed   *= 2f;
+            moveBehaviour.runSpeed    *= 2f;
+            moveBehaviour.sprintSpeed *= 2f;
+            moveBehaviour.RefreshSpeedSeeker();
+        }
+
+        // Couleur violette joueur
+        if (playerRenderer != null)
+        {
+            playerRenderer.material.EnableKeyword("_EMISSION");
+            playerRenderer.material.color = new Color(0.6f, 0f, 1f);
+            playerRenderer.material.SetColor("_EmissionColor", new Color(0.6f, 0f, 1f) * 2f);
+        }
+
+        // Particules violettes joueur
+        rageParticles = CreateRageParticles(transform);
+
+        // Buff ennemis présents
+        Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        foreach (var e in enemies)
+            e.ApplyRageBuff();
+
+        yield return new WaitForSeconds(duration);
+
+        // Restaurer force et vitesse joueur
+        strength = origStrength;
+        speed = origSpeed;
+        UpdateHUD();
+
+        if (moveBehaviour != null)
+        {
+            moveBehaviour.walkSpeed   = origWalk;
+            moveBehaviour.runSpeed    = origRun;
+            moveBehaviour.sprintSpeed = origSprint;
+            moveBehaviour.RefreshSpeedSeeker();
+        }
+
+        if (playerRenderer != null)
+        {
+            playerRenderer.material.color = originalColor;
+            playerRenderer.material.SetColor("_EmissionColor", originalEmission);
+        }
+
+        if (rageParticles != null)
+        {
+            Destroy(rageParticles.gameObject);
+            rageParticles = null;
+        }
+
+        // Retirer buff des ennemis survivants
+        enemies = FindObjectsByType<Enemy>(FindObjectsSortMode.None);
+        foreach (var e in enemies)
+            e.RemoveRageBuff();
+
+        isRaged = false;
+        rageCoroutine = null;
+    }
+
+    private ParticleSystem CreateRageParticles(Transform parent)
+    {
+        GameObject pGo = new GameObject("RageParticles");
+        pGo.transform.SetParent(parent, false);
+        pGo.transform.localPosition = Vector3.up;
+        ParticleSystem ps = pGo.AddComponent<ParticleSystem>();
+
+        var main = ps.main;
+        main.loop = true;
+        main.startLifetime = 0.8f;
+        main.startSpeed = 1.5f;
+        main.startSize = 0.08f;
+        main.startColor = new Color(0.6f, 0f, 1f, 1f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 20f;
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.5f;
+
+        return ps;
+    }
+
+    /// <summary>
+    /// Active le mode Berserker : ajoute les HP courants - 1 à la force, puis met les HP à 1.
+    /// </summary>
+    public void ActivateBerserker()
+    {
+        if (currentHealth > 1)
+            strength += currentHealth - 1;
+        currentHealth = 1;
+        UpdateHUD();
     }
 }

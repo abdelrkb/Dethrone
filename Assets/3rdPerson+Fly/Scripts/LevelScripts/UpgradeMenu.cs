@@ -18,6 +18,7 @@ public class UpgradeMenu : MonoBehaviour
     private Skill randomSkill;   // La compétence sélectionnée aléatoirement
     
     private bool waitingForSlotSelection = false; // En attente de sélection du slot
+    public bool IsWaitingForSlotSelection => waitingForSlotSelection;
 
     void Awake()
     {
@@ -72,7 +73,15 @@ public class UpgradeMenu : MonoBehaviour
     public void CloseMenu()
     {
         Time.timeScale = 1f; // REPREND AVANT DE FERMER
-        
+
+        // Bloquer les inputs skills pendant 1s pour éviter le déclenchement accidentel
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+        if (player != null)
+        {
+            PlayerStats ps = player.GetComponent<PlayerStats>();
+            if (ps != null) ps.BlockSkillInput(1f);
+        }
+
         if (upgradeMenu != null)
         {
             upgradeMenu.SetActive(false);
@@ -164,12 +173,33 @@ public class UpgradeMenu : MonoBehaviour
         }
 
         // Créer aléatoirement une compétence parmi les disponibles
-        int randomChoice = Random.Range(0, 1); // Augmente si tu ajoutes des compétences
+        int randomChoice = Random.Range(0, 8); // Augmente si tu ajoutes des compétences
         
         switch (randomChoice)
         {
             case 0:
                 randomSkill = new ZaWarudoSkill(playerAttack.zaWarudoImage, playerAttack.zaWarudoMiniImage, playerAttack.zaWarudoSFX);
+                break;
+            case 1:
+                randomSkill = new InfinityGauntletSkill(playerAttack.infinityGauntletImage, playerAttack.infinityGauntletMiniImage);
+                break;
+            case 2:
+                randomSkill = new MysteryBoxSkill(playerAttack.mysteryBoxImage, playerAttack.mysteryBoxMiniImage, playerAttack.mysteryBoxSFX);
+                break;
+            case 3:
+                randomSkill = new StarSkill(playerAttack.starImage, playerAttack.starMiniImage, playerAttack.starSFX);
+                break;
+            case 4:
+                randomSkill = new FrankLeboeufSkill(playerAttack.frankLeboeufImage, playerAttack.frankLeboeufMiniImage, playerAttack.frankLeboeufSFX);
+                break;
+            case 5:
+                randomSkill = new RageSpellSkill(playerAttack.rageSpellImage, playerAttack.rageSpellMiniImage, playerAttack.rageSpellSFX);
+                break;
+            case 6:
+                randomSkill = new SenzuBeanSkill(playerAttack.senzuBeanImage, playerAttack.senzuBeanMiniImage, playerAttack.senzuBeanSFX);
+                break;
+            case 7:
+                randomSkill = new BerserkerSkill(playerAttack.berserkerImage, playerAttack.berserkerMiniImage, playerAttack.berserkerSFX);
                 break;
         }
 

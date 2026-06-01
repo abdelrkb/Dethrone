@@ -24,6 +24,10 @@ public class Enemy : MonoBehaviour
     protected const float DELAY_BEFORE_FIRST_ATTACK = 0f;
     protected bool isFrozen = false;
     protected bool isAttacking = false;
+    private bool isRaged = false;
+    private float baseMoveSpeedForRage;
+    private float damageMultiplier = 1f;
+    private ParticleSystem rageParticles;
 
     protected virtual void Start()
     {
@@ -171,8 +175,9 @@ public class Enemy : MonoBehaviour
     {
         if (allRenderers != null)
         {
+            Color target = isRaged ? new Color(0.6f, 0f, 1f) : originalColor;
             foreach (Renderer r in allRenderers)
-                r.material.color = originalColor;
+                r.material.color = target;
         }
     }
 
@@ -201,7 +206,7 @@ public class Enemy : MonoBehaviour
 
     public int GetDamage()
     {
-        return damage;
+        return Mathf.RoundToInt(damage * damageMultiplier);
     }
 
     /// <summary>
@@ -254,5 +259,71 @@ public class Enemy : MonoBehaviour
     public bool IsFrozen()
     {
         return isFrozen;
+    }
+
+    /// <summary>
+    /// Active le buff Rage Spell : vitesse et dégâts doublés, couleur violette avec particules.
+    /// </summary>
+    public void ApplyRageBuff()
+    {
+        if (isRaged) return;
+        isRaged = true;
+        baseMoveSpeedForRage = moveSpeed;
+        moveSpeed *= 2f;
+        damageMultiplier = 2f;
+        if (agent != null) agent.speed = moveSpeed;
+
+        if (allRenderers != null)
+            foreach (Renderer r in allRenderers)
+                r.material.color = new Color(0.6f, 0f, 1f);
+
+        rageParticles = CreateRageParticles();
+    }
+
+    /// <summary>
+    /// Retire le buff Rage Spell et restaure les valeurs d'origine.
+    /// </summary>
+    public void RemoveRageBuff()
+    {
+        if (!isRaged) return;
+        isRaged = false;
+        moveSpeed = baseMoveSpeedForRage;
+        damageMultiplier = 1f;
+        if (agent != null) agent.speed = moveSpeed;
+
+        if (allRenderers != null)
+            foreach (Renderer r in allRenderers)
+                r.material.color = originalColor;
+
+        if (rageParticles != null)
+        {
+            Destroy(rageParticles.gameObject);
+            rageParticles = null;
+        }
+    }
+
+    private ParticleSystem CreateRageParticles()
+    {
+        GameObject pGo = new GameObject("RageParticles");
+        pGo.transform.SetParent(transform, false);
+        pGo.transform.localPosition = Vector3.up;
+        ParticleSystem ps = pGo.AddComponent<ParticleSystem>();
+
+        var main = ps.main;
+        main.loop = true;
+        main.startLifetime = 0.8f;
+        main.startSpeed = 1.5f;
+        main.startSize = 0.08f;
+        main.startColor = new Color(0.6f, 0f, 1f, 1f);
+        main.simulationSpace = ParticleSystemSimulationSpace.World;
+
+        var emission = ps.emission;
+        emission.rateOverTime = 15f;
+
+        var shape = ps.shape;
+        shape.shapeType = ParticleSystemShapeType.Sphere;
+        shape.radius = 0.5f;
+
+        return ps;
     }
 }

@@ -27,6 +27,7 @@ public class MusicManager : MonoBehaviour
     private Coroutine fadeCoroutine;
     private Coroutine resumeCoroutine;
     private bool isGamePaused = false;
+    private bool isMusicPausedBySkill = false;
 
     void Awake()
     {
@@ -98,28 +99,34 @@ public class MusicManager : MonoBehaviour
     public void PauseMusic()
     {
         isGamePaused = true;
-        audioSource.Pause();
+        // Ne mettre en pause la musique que si elle n'est pas déjà coupée par un skill
+        if (!isMusicPausedBySkill)
+            audioSource.Pause();
         sfxSource.Pause();
     }
 
     public void ResumeMusic()
     {
         isGamePaused = false;
-        audioSource.UnPause();
+        // Ne reprendre la musique que si elle n'est pas coupée par un skill
+        if (!isMusicPausedBySkill)
+            audioSource.UnPause();
         sfxSource.UnPause();
     }
 
     /// <summary>
     /// Joue un SFX de skill.
     /// Si cutMusic est true, la musique est mise en pause pendant la durée du SFX puis reprend.
+    /// volume : multiplicateur de volume (>1 possible pour booster le son).
     /// </summary>
-    public void PlaySkillSFX(AudioClip clip, bool cutMusic = false)
+    public void PlaySkillSFX(AudioClip clip, bool cutMusic = false, float volume = 1f)
     {
         if (clip == null) return;
 
         sfxSource.Stop();
-        sfxSource.clip = clip;
-        sfxSource.Play();
+        sfxSource.volume = 1f;
+        // PlayOneShot permet un volumeScale > 1 pour amplifier le son
+        sfxSource.PlayOneShot(clip, volume);
 
         if (cutMusic)
         {
@@ -128,11 +135,24 @@ public class MusicManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// Arrête le SFX en cours et reprend la musique (utilisé par le skill Star).
+    /// </summary>
+    public void StopSFXAndResumeMusic()
+    {
+        if (resumeCoroutine != null) StopCoroutine(resumeCoroutine);
+        sfxSource.Stop();
+        isMusicPausedBySkill = false;
+        if (!isGamePaused)
+            audioSource.UnPause();
+    }
+
     private IEnumerator PauseMusicForSFX(float duration)
     {
+        isMusicPausedBySkill = true;
         audioSource.Pause();
         yield return new WaitForSeconds(duration);
-        // Ne reprendre la musique que si le jeu n'est pas en pause
+        isMusicPausedBySkill = false;
         if (!isGamePaused)
             audioSource.UnPause();
     }

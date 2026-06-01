@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 
 /// <summary>
 /// Gère l'écran de défaite.
@@ -22,6 +23,7 @@ public class DefeatScreen : MonoBehaviour
     [Header("Références UI")]
     public GameObject defeatPanel;
     public Button retryButton;
+    public TMP_Text defeatText;
 
     private PlayerStats playerStats;
 
@@ -44,7 +46,18 @@ public class DefeatScreen : MonoBehaviour
     /// </summary>
     public void Show(PlayerStats stats)
     {
+        ShowWithMessage(stats, "DEFEAT");
+    }
+
+    /// <summary>
+    /// Affiche l'écran de défaite avec un message personnalisé.
+    /// </summary>
+    public void ShowWithMessage(PlayerStats stats, string message)
+    {
         playerStats = stats;
+
+        if (defeatText != null)
+            defeatText.text = message;
 
         if (defeatPanel != null)
             defeatPanel.SetActive(true);

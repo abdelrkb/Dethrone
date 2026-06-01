@@ -14,6 +14,8 @@ public class Skill
     public AudioClip sfx;
     /// <summary>Si true, la musique est mise en pause pendant la durée du SFX</summary>
     public bool cutMusic = false;
+    /// <summary>Multiplicateur de volume du SFX (>1 pour amplifier).</summary>
+    protected virtual float sfxVolume => 1f;
 
     private float lastUsedTime = -float.MaxValue;
 
@@ -46,7 +48,7 @@ public class Skill
         {
             lastUsedTime = Time.time;
             if (sfx != null && MusicManager.Instance != null)
-                MusicManager.Instance.PlaySkillSFX(sfx, cutMusic);
+                MusicManager.Instance.PlaySkillSFX(sfx, cutMusic, sfxVolume);
             Debug.Log($"Compétence {name} applique son effet sur {target.name}");
         }
         else

@@ -13,6 +13,26 @@ public class PlayerAttack : MonoBehaviour
     public Sprite zaWarudoImage; // Drag l'image de ZA WARUDO ici (grande version)
     public Sprite zaWarudoMiniImage; // Drag la mini image de ZA WARUDO ici (pour HUD)
     public AudioClip zaWarudoSFX; // Drag le SFX de ZA WARUDO ici
+    public Sprite infinityGauntletImage;
+    public Sprite infinityGauntletMiniImage;
+    public Sprite mysteryBoxImage;
+    public Sprite mysteryBoxMiniImage;
+    public AudioClip mysteryBoxSFX;
+    public Sprite starImage;
+    public Sprite starMiniImage;
+    public AudioClip starSFX;
+    public Sprite frankLeboeufImage;
+    public Sprite frankLeboeufMiniImage;
+    public AudioClip frankLeboeufSFX;
+    public Sprite rageSpellImage;
+    public Sprite rageSpellMiniImage;
+    public AudioClip rageSpellSFX;
+    public Sprite senzuBeanImage;
+    public Sprite senzuBeanMiniImage;
+    public AudioClip senzuBeanSFX;
+    public Sprite berserkerImage;
+    public Sprite berserkerMiniImage;
+    public AudioClip berserkerSFX;
     
     private Animator animator;
     private PlayerStats playerStats;
