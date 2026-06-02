@@ -52,7 +52,12 @@ public class MusicManager : MonoBehaviour
 
     void Start()
     {
-        PlayGameplayMusic();
+        // Si le menu principal est présent dans la scène, jouer la musique du menu.
+        // Sinon (partie déjà en cours ou scène sans menu), jouer la musique gameplay.
+        if (MainMenuScreen.Instance != null)
+            PlayMenuMusic();
+        else
+            PlayGameplayMusic();
     }
 
     // ──────────────────────────────────────────────────

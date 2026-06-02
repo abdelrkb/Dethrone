@@ -7,15 +7,20 @@ public class Weapon
 {
     public string name;
     public int damage;
-    public GameObject fbxPrefab; // Modèle 3D de l'arme
-    public Sprite image; // Image UI pour les upgrades
+    public GameObject fbxPrefab;
+    public Sprite image;
+    public Vector3 positionOffset = Vector3.zero;
+    public Vector3 rotationOffset = Vector3.zero;
 
-    public Weapon(string name, int damage, GameObject fbxPrefab = null, Sprite image = null)
+    public Weapon(string name, int damage, GameObject fbxPrefab = null, Sprite image = null,
+                  Vector3 positionOffset = default, Vector3 rotationOffset = default)
     {
         this.name = name;
         this.damage = damage;
         this.fbxPrefab = fbxPrefab;
         this.image = image;
+        this.positionOffset = positionOffset;
+        this.rotationOffset = rotationOffset;
     }
 
     /// <summary>

@@ -23,6 +23,7 @@ public class DefeatScreen : MonoBehaviour
     [Header("Références UI")]
     public GameObject defeatPanel;
     public Button retryButton;
+    public Button homeButton;
     public TMP_Text defeatText;
 
     private PlayerStats playerStats;
@@ -39,6 +40,9 @@ public class DefeatScreen : MonoBehaviour
 
         if (retryButton != null)
             retryButton.onClick.AddListener(OnRetry);
+
+        if (homeButton != null)
+            homeButton.onClick.AddListener(OnHome);
     }
 
     /// <summary>
@@ -77,5 +81,18 @@ public class DefeatScreen : MonoBehaviour
 
         if (playerStats != null)
             playerStats.ExecuteRetry();
+    }
+
+    private void OnHome()
+    {
+        if (defeatPanel != null)
+            defeatPanel.SetActive(false);
+
+        // Reset complet avant de retourner au menu
+        if (playerStats != null)
+            playerStats.FullReset();
+
+        if (WaveManager.Instance != null)
+            WaveManager.Instance.ReturnToMainMenu();
     }
 }

@@ -9,7 +9,6 @@ public class FlyBehaviour : GenericBehaviour
 	public float flyMaxVerticalAngle = 60f;       // Angle to clamp camera vertical movement when flying.
 
 	private int flyBool;                          // Animator variable related to flying.
-	private bool fly = false;                     // Boolean to determine whether or not the player activated fly mode.
 	private CapsuleCollider col;                  // Reference to the player capsule collider.
 
 	// Start is always called after any Awake functions.
@@ -25,41 +24,6 @@ public class FlyBehaviour : GenericBehaviour
 	// Update is used to set features regardless the active behaviour.
 	void Update()
 	{
-		// Toggle fly by input, only if there is no overriding state or temporary transitions.
-		if (Input.GetButtonDown(flyButton) && !behaviourManager.IsOverriding() 
-			&& !behaviourManager.GetTempLockStatus(behaviourManager.GetDefaultBehaviour))
-		{
-			fly = !fly;
-
-			// Force end jump transition.
-			behaviourManager.UnlockTempBehaviour(behaviourManager.GetDefaultBehaviour);
-
-			// Obey gravity. It's the law!
-			behaviourManager.GetRigidBody.useGravity = !fly;
-
-			// Player is flying.
-			if (fly)
-			{
-				// Register this behaviour.
-				behaviourManager.RegisterBehaviour(this.behaviourCode);
-			}
-			else
-			{
-				// Set collider direction to vertical.
-				col.direction = 1;
-				// Set camera default offset.
-				behaviourManager.GetCamScript.ResetTargetOffsets();
-
-				// Unregister this behaviour and set current behaviour to the default one.
-				behaviourManager.UnregisterBehaviour(this.behaviourCode);
-			}
-		}
-
-		// Assert this is the active behaviour
-		fly = fly && behaviourManager.IsCurrentBehaviour(this.behaviourCode);
-
-		// Set fly related variables on the Animator Controller.
-		behaviourManager.GetAnim.SetBool(flyBool, fly);
 	}
 
 	// This function is called when another behaviour overrides the current one.

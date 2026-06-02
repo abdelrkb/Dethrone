@@ -21,6 +21,7 @@ public class PlayerStats : MonoBehaviour
     private bool isInvincible = false;
     private Coroutine starCoroutine;
     private bool isRaged = false;
+    public bool hasOnePunchMan = false;
     private Coroutine rageCoroutine;
     private ParticleSystem rageParticles;
     
@@ -411,6 +412,7 @@ public class PlayerStats : MonoBehaviour
         speed = 1;
         maxHealth = 100;
         currentHealth = maxHealth;
+        hasOnePunchMan = false;
 
         // Vider tous les skills
         string[] keyLabels = { "C", "V", "B" };

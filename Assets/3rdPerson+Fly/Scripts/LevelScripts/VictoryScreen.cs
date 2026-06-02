@@ -11,6 +11,7 @@ public class VictoryScreen : MonoBehaviour
     [Header("Références UI")]
     public GameObject victoryPanel;
     public Button playAgainButton;
+    public Button homeButton;
 
     void Awake()
     {
@@ -24,6 +25,9 @@ public class VictoryScreen : MonoBehaviour
 
         if (playAgainButton != null)
             playAgainButton.onClick.AddListener(OnPlayAgain);
+
+        if (homeButton != null)
+            homeButton.onClick.AddListener(OnHome);
     }
 
     /// <summary>
@@ -53,5 +57,17 @@ public class VictoryScreen : MonoBehaviour
             MusicManager.Instance.PlayGameplayMusic();
 
         WaveManager.Instance.RestartGame();
+    }
+
+    private void OnHome()
+    {
+        if (victoryPanel != null)
+            victoryPanel.SetActive(false);
+
+        PlayerStats playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats != null)
+            playerStats.FullReset();
+
+        WaveManager.Instance.ReturnToMainMenu();
     }
 }

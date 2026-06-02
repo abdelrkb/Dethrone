@@ -9,10 +9,18 @@ public class PlayerAttack : MonoBehaviour
     public GameObject swordFbx; // Drag ta sword ici
     public Sprite swordImage;   // Drag l'image de l'épée ici
     public Sprite fistImage;    // Drag l'image du poing ici
-    public Sprite superSonicImage; // Drag l'image de Super Sonic ici
-    public Sprite zaWarudoImage; // Drag l'image de ZA WARUDO ici (grande version)
-    public Sprite zaWarudoMiniImage; // Drag la mini image de ZA WARUDO ici (pour HUD)
-    public AudioClip zaWarudoSFX; // Drag le SFX de ZA WARUDO ici
+    [Header("Stats images")]
+    public Sprite superSonicImage;
+    public Sprite gigaChadImage;
+    public Sprite onePunchManImage;
+    public Sprite popeyeImage;
+    public Sprite titanImage;
+    public Sprite gear2Image;
+
+    [Header("Skills")]
+    public Sprite zaWarudoImage; 
+    public Sprite zaWarudoMiniImage; 
+    public AudioClip zaWarudoSFX; 
     public Sprite infinityGauntletImage;
     public Sprite infinityGauntletMiniImage;
     public Sprite mysteryBoxImage;
@@ -33,6 +41,10 @@ public class PlayerAttack : MonoBehaviour
     public Sprite berserkerImage;
     public Sprite berserkerMiniImage;
     public AudioClip berserkerSFX;
+
+    [Header("Offset épée en main")]
+    public Vector3 swordPositionOffset = new Vector3(0f, 0.2f, 0f);
+    public Vector3 swordRotationOffset = Vector3.zero;
     
     private Animator animator;
     private PlayerStats playerStats;
@@ -47,7 +59,7 @@ public class PlayerAttack : MonoBehaviour
         hitbox = GetComponentInChildren<PlayerHitbox>();
         if (hitbox != null) hitbox.Init(this);
 
-        EquipWeapon(new Sword(swordFbx, swordImage));
+        EquipWeapon(new Sword(swordFbx, swordImage, swordPositionOffset, swordRotationOffset));
     }
 
     void Update()
@@ -84,6 +96,11 @@ public class PlayerAttack : MonoBehaviour
     public void EquipWeapon(Weapon weapon)
     {
         currentWeapon = weapon;
+
+        // One Punch Man : si Fist équipé et flag actif, 100 dégâts
+        if (weapon is Fist && playerStats != null && playerStats.hasOnePunchMan)
+            weapon.damage = 100;
+
         Debug.Log($"Arme équipée: {weapon.name}");
         
         // Récupérer le WeaponHolder dans la main droite
@@ -103,9 +120,8 @@ public class PlayerAttack : MonoBehaviour
                 if (weapon.fbxPrefab != null)
                 {
                     GameObject weaponInstance = Instantiate(weapon.fbxPrefab, weaponHolder);
-                    weaponInstance.transform.localPosition = Vector3.zero;
-                    weaponInstance.transform.localRotation = Quaternion.identity;
-
+                    weaponInstance.transform.localPosition = weapon.positionOffset;
+                    weaponInstance.transform.localRotation = Quaternion.Euler(weapon.rotationOffset);
                 }
             }
             else
@@ -146,6 +162,6 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     public void FullReset()
     {
-        EquipWeapon(new Sword(swordFbx, swordImage));
+        EquipWeapon(new Sword(swordFbx, swordImage, swordPositionOffset, swordRotationOffset));
     }
 }

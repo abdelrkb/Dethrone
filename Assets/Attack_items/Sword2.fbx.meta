@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 314944488fb409b468a0af0b33b2bd24
+guid: 80d5a840281290f428bffeb8fed9e676
 ModelImporter:
   serializedVersion: 24200
   internalIDToNameTable: []
@@ -108,10 +108,3 @@ ModelImporter:
   userData: 
   assetBundleName: 
   assetBundleVariant: 
-AssetOrigin:
-  serializedVersion: 1
-  productId: 359846
-  packageName: Low poly 3D sword pack
-  packageVersion: 1.0
-  assetPath: Assets/Korzanowski/Sword pack/Models/Sword2.fbx
-  uploadId: 857704

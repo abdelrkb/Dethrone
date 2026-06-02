@@ -1,4 +1,5 @@
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Gère le menu pause (touche P).
@@ -9,8 +10,9 @@ using UnityEngine;
 /// 2. Dans PausePanel, ajouter :
 ///    - TMP_Text "PAUSE" : grand, centré, blanc.
 ///    - TMP_Text "Press P to resume" : plus petit, centré, blanc, position Y légèrement plus bas.
+///    - Button "HomeButton" avec texte "MENU PRINCIPAL".
 /// 3. Attacher ce script sur un GameObject vide "PauseMenu".
-/// 4. Drag PausePanel dans l'Inspecteur.
+/// 4. Drag PausePanel et HomeButton dans l'Inspecteur.
 /// 5. Laisser PausePanel désactivé par défaut.
 /// </summary>
 public class PauseMenu : MonoBehaviour
@@ -19,6 +21,7 @@ public class PauseMenu : MonoBehaviour
 
     [Header("Références UI")]
     public GameObject pausePanel;
+    public Button homeButton;
 
     private bool isPaused = false;
 
@@ -31,6 +34,9 @@ public class PauseMenu : MonoBehaviour
     {
         if (pausePanel != null)
             pausePanel.SetActive(false);
+
+        if (homeButton != null)
+            homeButton.onClick.AddListener(OnHome);
     }
 
     void Update()
@@ -65,5 +71,19 @@ public class PauseMenu : MonoBehaviour
         if (MusicManager.Instance != null)
             MusicManager.Instance.ResumeMusic();
         Time.timeScale = 1f;
+    }
+
+    private void OnHome()
+    {
+        isPaused = false;
+        if (pausePanel != null)
+            pausePanel.SetActive(false);
+
+        PlayerStats playerStats = FindFirstObjectByType<PlayerStats>();
+        if (playerStats != null)
+            playerStats.FullReset();
+
+        if (WaveManager.Instance != null)
+            WaveManager.Instance.ReturnToMainMenu();
     }
 }

@@ -5,8 +5,9 @@ using UnityEngine;
 /// </summary>
 public class Sword : Weapon
 {
-    public Sword(GameObject fbxPrefab = null, Sprite imageSprite = null) 
-        : base("Épée", 10, fbxPrefab, imageSprite)
+    public Sword(GameObject fbxPrefab = null, Sprite imageSprite = null,
+                 Vector3 positionOffset = default, Vector3 rotationOffset = default)
+        : base("Épée", 10, fbxPrefab, imageSprite, positionOffset, rotationOffset)
     {
     }
 

@@ -35,6 +35,19 @@ public class WaveManager : MonoBehaviour
             }
         }
 
+        // Ne pas démarrer si le menu principal est affiché
+        if (MainMenuScreen.Instance == null)
+            StartWave();
+    }
+
+    /// <summary>
+    /// Appelé par MainMenuScreen quand le joueur clique Play.
+    /// </summary>
+    public void StartGameFromMenu()
+    {
+        currentWave = 1;
+        waveInProgress = false;
+        if (GameTimer.Instance != null) GameTimer.Instance.StartTimer();
         StartWave();
     }
 
@@ -166,6 +179,7 @@ public void GameWon()
     Debug.Log("You have defeated the Boss! Congratulations!");
     
     waveText.text = "VICTORY!";
+    if (GameTimer.Instance != null) GameTimer.Instance.StopAndSave();
     if (MusicManager.Instance != null) MusicManager.Instance.PlayVictoryMusic();
 
     if (VictoryScreen.Instance != null)
@@ -181,6 +195,7 @@ public void RestartGame()
 {
     currentWave = 1;
     waveInProgress = false;
+    if (GameTimer.Instance != null) GameTimer.Instance.StartTimer();
     if (MusicManager.Instance != null) MusicManager.Instance.PlayGameplayMusic();
     
     // Détruire tous les ennemis actuels
@@ -192,5 +207,24 @@ public void RestartGame()
     
     // Redémarrer la wave
     StartWave();
+}
+
+/// <summary>
+/// Retourne au menu principal (affiche le MainMenuScreen dans la scène courante).
+/// </summary>
+public void ReturnToMainMenu()
+{
+    currentWave = 1;
+    waveInProgress = false;
+    if (GameTimer.Instance != null) GameTimer.Instance.ResetTimer();
+
+    // Détruire tous les ennemis
+    Enemy[] enemies = FindObjectsByType<Enemy>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+    foreach (var enemy in enemies)
+        Destroy(enemy.gameObject);
+
+    // Afficher le menu principal
+    if (MainMenuScreen.Instance != null)
+        MainMenuScreen.Instance.Show();
 }
 }

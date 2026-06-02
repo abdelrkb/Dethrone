@@ -138,12 +138,27 @@ public class UpgradeMenu : MonoBehaviour
         }
 
         // Créer aléatoirement une stat parmi les disponibles
-        int randomChoice = Random.Range(0, 1); // Augmente si tu ajoutes des stats
+        int randomChoice = Random.Range(0, 6);
         
         switch (randomChoice)
         {
             case 0:
                 randomStat = new SuperSonicStat(playerAttack.superSonicImage);
+                break;
+            case 1:
+                randomStat = new GigaChadStat(playerAttack.gigaChadImage);
+                break;
+            case 2:
+                randomStat = new OnePunchManStat(playerAttack.onePunchManImage);
+                break;
+            case 3:
+                randomStat = new PopeyeStat(playerAttack.popeyeImage);
+                break;
+            case 4:
+                randomStat = new TitanStat(playerAttack.titanImage);
+                break;
+            case 5:
+                randomStat = new Gear2Stat(playerAttack.gear2Image);
                 break;
         }
 
