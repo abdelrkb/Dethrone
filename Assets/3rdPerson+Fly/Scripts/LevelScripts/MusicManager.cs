@@ -24,6 +24,7 @@ public class MusicManager : MonoBehaviour
 
     private AudioSource audioSource;
     private AudioSource sfxSource;
+    private AudioSource weaponSfxSource;
     private Coroutine fadeCoroutine;
     private Coroutine resumeCoroutine;
     private bool isGamePaused = false;
@@ -43,6 +44,10 @@ public class MusicManager : MonoBehaviour
             sfxSource = gameObject.AddComponent<AudioSource>();
             sfxSource.loop = false;
             sfxSource.volume = 1f;
+
+            weaponSfxSource = gameObject.AddComponent<AudioSource>();
+            weaponSfxSource.loop = false;
+            weaponSfxSource.volume = 1f;
         }
         else
         {
@@ -117,6 +122,15 @@ public class MusicManager : MonoBehaviour
         if (!isMusicPausedBySkill)
             audioSource.UnPause();
         sfxSource.UnPause();
+    }
+
+    /// <summary>
+    /// Joue un SFX d'arme sans interrompre les SFX de skills en cours.
+    /// </summary>
+    public void PlayWeaponSFX(AudioClip clip, float volume = 1f)
+    {
+        if (clip == null) return;
+        weaponSfxSource.PlayOneShot(clip, volume);
     }
 
     /// <summary>

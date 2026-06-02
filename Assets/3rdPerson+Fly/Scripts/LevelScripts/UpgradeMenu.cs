@@ -108,7 +108,7 @@ public class UpgradeMenu : MonoBehaviour
                 randomWeapon = new Sword(playerAttack.swordFbx, playerAttack.swordImage);
                 break;
             case 1:
-                randomWeapon = new Fist(playerAttack.fistImage);
+                randomWeapon = new Fist(playerAttack.fistImage, playerAttack.fistSFX);
                 break;
         }
 

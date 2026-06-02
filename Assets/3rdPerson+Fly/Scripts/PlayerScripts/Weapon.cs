@@ -9,11 +9,12 @@ public class Weapon
     public int damage;
     public GameObject fbxPrefab;
     public Sprite image;
+    public AudioClip sfx;
     public Vector3 positionOffset = Vector3.zero;
     public Vector3 rotationOffset = Vector3.zero;
 
     public Weapon(string name, int damage, GameObject fbxPrefab = null, Sprite image = null,
-                  Vector3 positionOffset = default, Vector3 rotationOffset = default)
+                  Vector3 positionOffset = default, Vector3 rotationOffset = default, AudioClip sfx = null)
     {
         this.name = name;
         this.damage = damage;
@@ -21,6 +22,7 @@ public class Weapon
         this.image = image;
         this.positionOffset = positionOffset;
         this.rotationOffset = rotationOffset;
+        this.sfx = sfx;
     }
 
     /// <summary>

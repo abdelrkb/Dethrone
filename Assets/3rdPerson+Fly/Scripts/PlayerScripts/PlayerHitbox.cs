@@ -34,6 +34,10 @@ public class PlayerHitbox : MonoBehaviour
             Debug.Log($"[PlayerHitbox] Ennemi touché ! Dégâts : {playerAttack.GetTotalDamage()}");
             enemy.TakeDamage(playerAttack.GetTotalDamage());
             hasHitThisSwing = true;
+
+            Weapon w = playerAttack.GetCurrentWeapon();
+            if (w?.sfx != null)
+                MusicManager.Instance?.PlayWeaponSFX(w.sfx);
         }
         else
         {

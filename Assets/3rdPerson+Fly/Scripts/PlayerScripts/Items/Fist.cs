@@ -5,8 +5,8 @@ using UnityEngine;
 /// </summary>
 public class Fist : Weapon
 {
-    public Fist(Sprite imageSprite = null) 
-        : base("Poings", 5, null, imageSprite)
+    public Fist(Sprite imageSprite = null, AudioClip sfx = null)
+        : base("Poings", 5, null, imageSprite, default, default, sfx)
     {
     }
 

@@ -8,7 +8,9 @@ public class PlayerAttack : MonoBehaviour
     // Assets à drag-drop dans l'Inspector
     public GameObject swordFbx; // Drag ta sword ici
     public Sprite swordImage;   // Drag l'image de l'épée ici
+    public AudioClip swordSFX;
     public Sprite fistImage;    // Drag l'image du poing ici
+    public AudioClip fistSFX;
     [Header("Stats images")]
     public Sprite superSonicImage;
     public Sprite gigaChadImage;
@@ -59,7 +61,7 @@ public class PlayerAttack : MonoBehaviour
         hitbox = GetComponentInChildren<PlayerHitbox>();
         if (hitbox != null) hitbox.Init(this);
 
-        EquipWeapon(new Sword(swordFbx, swordImage, swordPositionOffset, swordRotationOffset));
+        EquipWeapon(new Sword(swordFbx, swordImage, swordPositionOffset, swordRotationOffset, swordSFX));
     }
 
     void Update()
@@ -162,6 +164,6 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     public void FullReset()
     {
-        EquipWeapon(new Sword(swordFbx, swordImage, swordPositionOffset, swordRotationOffset));
+        EquipWeapon(new Sword(swordFbx, swordImage, swordPositionOffset, swordRotationOffset, swordSFX));
     }
 }
