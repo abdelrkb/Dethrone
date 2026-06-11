@@ -4,15 +4,14 @@ public class Boss : Enemy
 {
     protected override void Start()
     {
-        // Définir les statistiques du Boss
-        maxHealth = 200;
+        // Stats du boss roi — à ajuster quand le skin est prêt
+        maxHealth = 300;
         currentHealth = maxHealth;
-        damage = 20;
-        moveSpeed = 3f;
+        damage = 25;
+        moveSpeed = 3.5f;
         stoppingDistance = 1.2f;
-        attackCooldown = 1f;        // Attaque plus vite qu'un Goblin (1s vs 1.5s)
+        attackCooldown = 0.8f;
 
-        // Appeler la méthode Start de la classe parente
         base.Start();
     }
 }

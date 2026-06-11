@@ -155,7 +155,17 @@ public class PlayerAttack : MonoBehaviour
     /// </summary>
     public int GetTotalDamage()
     {
-        if (currentWeapon == null) return 0;
+        if (currentWeapon == null)
+        {
+            Debug.LogWarning("[PlayerAttack] currentWeapon est NULL !");
+            return 0;
+        }
+        if (playerStats == null)
+        {
+            Debug.LogWarning("[PlayerAttack] playerStats est NULL !");
+            return currentWeapon.damage;
+        }
+        Debug.Log($"[PlayerAttack] strength={playerStats.strength} + weaponDamage={currentWeapon.damage} = {playerStats.strength + currentWeapon.damage}");
         return playerStats.strength + currentWeapon.damage;
     }
 

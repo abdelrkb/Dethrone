@@ -10,6 +10,7 @@ public class WaveManager : MonoBehaviour
     public TMP_Text waveText;
 
     public GameObject enemyPrefab;
+    public GameObject zombiePrefab;
     public GameObject bossPrefab;
     public Transform[] spawnPoints;
 
@@ -77,7 +78,12 @@ public class WaveManager : MonoBehaviour
         int randomIndex = Random.Range(0, spawnPoints.Length);
         Transform spawnPoint = spawnPoints[randomIndex];
 
-        Instantiate(enemyPrefab, spawnPoint.position, Quaternion.identity);
+        // Si zombiePrefab assigné, on tire au sort entre goblin et zombie
+        GameObject prefabToSpawn = enemyPrefab;
+        if (zombiePrefab != null && Random.value < 0.5f)
+            prefabToSpawn = zombiePrefab;
+
+        Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity);
     }
 
     public void EnemyKilled()

@@ -28,6 +28,7 @@ public class Enemy : MonoBehaviour
     private float baseMoveSpeedForRage;
     private float damageMultiplier = 1f;
     private ParticleSystem rageParticles;
+    private bool isDying = false;
 
     protected virtual void Start()
     {
@@ -64,6 +65,8 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Update()
     {
+        if (isDying) return;
+
         if (player != null && isAttacking)
         {
             Vector3 direction = (player.position - transform.position);
@@ -114,6 +117,7 @@ public class Enemy : MonoBehaviour
     /// </summary>
     public virtual void TakeDamage(int amount)
     {
+        if (isDying) return;
         currentHealth -= amount;
         FlashRed();
 
@@ -158,7 +162,7 @@ public class Enemy : MonoBehaviour
     public virtual void OnAttackEnd()
     {
         isAttacking = false;
-        if (agent != null) agent.isStopped = false;
+        if (agent != null && agent.enabled && agent.isOnNavMesh) agent.isStopped = false;
     }
 
     protected virtual void FlashRed()
@@ -183,6 +187,7 @@ public class Enemy : MonoBehaviour
 
     protected virtual void Die()
     {
+        isDying = true;
         Debug.Log($"[Enemy] Die() appelé — anim={anim}, agent={agent}");
 
         if (anim != null)
