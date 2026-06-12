@@ -100,7 +100,7 @@ public class UpgradeMenu : MonoBehaviour
         }
 
         // Créer aléatoirement une arme parmi les disponibles
-        int randomChoice = Random.Range(0, 2);
+        int randomChoice = Random.Range(0, 3);
         
         switch (randomChoice)
         {
@@ -109,6 +109,10 @@ public class UpgradeMenu : MonoBehaviour
                 break;
             case 1:
                 randomWeapon = new Fist(playerAttack.fistImage, playerAttack.fistSFX);
+                break;
+            case 2:
+                randomWeapon = new LightSaber(playerAttack.lightSaberFbx, playerAttack.lightSaberImage,
+                    default, default, playerAttack.lightSaberSFX);
                 break;
         }
 

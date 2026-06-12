@@ -8,7 +8,7 @@ public class PlayerStats : MonoBehaviour
     public int maxHealth = 100;
     public int currentHealth;
 
-    public int strength = 0;
+    public int strength = 1;
     public int speed = 1;
 
     public Transform healthBar; // Health_Fill

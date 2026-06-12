@@ -6,9 +6,12 @@ public class PlayerAttack : MonoBehaviour
     public LayerMask enemyLayer;
     
     // Assets à drag-drop dans l'Inspector
-    public GameObject swordFbx; // Drag ta sword ici
-    public Sprite swordImage;   // Drag l'image de l'épée ici
+    public GameObject swordFbx;
+    public Sprite swordImage;
     public AudioClip swordSFX;
+    public GameObject lightSaberFbx;
+    public Sprite lightSaberImage;
+    public AudioClip lightSaberSFX;
     public Sprite fistImage;    // Drag l'image du poing ici
     public AudioClip fistSFX;
     [Header("Stats images")]

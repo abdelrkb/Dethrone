@@ -2,6 +2,14 @@ using UnityEngine;
 using TMPro;
 using System.Collections;
 
+[System.Serializable]
+public class WaveData
+{
+    public int goblinCount;
+    public int zombieCount;
+    public bool spawnBoss;
+}
+
 public class WaveManager : MonoBehaviour
 {
     public static WaveManager Instance;
@@ -9,14 +17,27 @@ public class WaveManager : MonoBehaviour
     public int currentWave = 1;
     public TMP_Text waveText;
 
-    public GameObject enemyPrefab;
+    public GameObject enemyPrefab;   // Gobelin
     public GameObject zombiePrefab;
     public GameObject bossPrefab;
     public Transform[] spawnPoints;
 
-    public int enemiesPerWave = 10;
-    private int enemiesAlive = 0;
+    [Header("Configuration des vagues")]
+    public WaveData[] waves = new WaveData[]
+    {
+        new WaveData { goblinCount = 1,  zombieCount = 0, spawnBoss = false }, // Vague 1
+        new WaveData { goblinCount = 2,  zombieCount = 1, spawnBoss = false }, // Vague 2
+        new WaveData { goblinCount = 3,  zombieCount = 1, spawnBoss = false }, // Vague 3
+        new WaveData { goblinCount = 3,  zombieCount = 2, spawnBoss = false }, // Vague 4
+        new WaveData { goblinCount = 4,  zombieCount = 2, spawnBoss = false }, // Vague 5
+        new WaveData { goblinCount = 4,  zombieCount = 3, spawnBoss = false }, // Vague 6
+        new WaveData { goblinCount = 5,  zombieCount = 3, spawnBoss = false }, // Vague 7
+        new WaveData { goblinCount = 5,  zombieCount = 4, spawnBoss = false }, // Vague 8
+        new WaveData { goblinCount = 6,  zombieCount = 4, spawnBoss = false }, // Vague 9
+        new WaveData { goblinCount = 0,  zombieCount = 0, spawnBoss = true  }, // Vague 10 - Boss
+    };
 
+    private int enemiesAlive = 0;
     private bool waveInProgress = false;
 
     void Awake()
@@ -55,11 +76,12 @@ public class WaveManager : MonoBehaviour
     void StartWave()
     {
         waveInProgress = true;
-
         waveText.text = "Wave : " + currentWave;
 
-        // À la vague 10, spawner le boss uniquement
-        if (currentWave == 10)
+        int waveIndex = Mathf.Clamp(currentWave - 1, 0, waves.Length - 1);
+        WaveData data = waves[waveIndex];
+
+        if (data.spawnBoss)
         {
             enemiesAlive = 1;
             if (MusicManager.Instance != null) MusicManager.Instance.PlayBossMusic();
@@ -67,24 +89,17 @@ public class WaveManager : MonoBehaviour
         }
         else
         {
-            enemiesAlive = enemiesPerWave;
+            enemiesAlive = data.goblinCount + data.zombieCount;
             if (MusicManager.Instance != null) MusicManager.Instance.PlayGameplayMusic();
-            StartCoroutine(SpawnWave());
+            StartCoroutine(SpawnWave(data));
         }
     }
 
-    void SpawnEnemy()
+    void SpawnEnemy(GameObject prefab)
     {
         int randomIndex = Random.Range(0, spawnPoints.Length);
-        Transform spawnPoint = spawnPoints[randomIndex];
-
-        // Si zombiePrefab assigné, on tire au sort entre goblin et zombie
-        GameObject prefabToSpawn = enemyPrefab;
-        if (zombiePrefab != null && Random.value < 0.5f)
-            prefabToSpawn = zombiePrefab;
-
-        Instantiate(prefabToSpawn, spawnPoint.position, Quaternion.identity);
-    }
+        Instantiate(prefab, spawnPoints[randomIndex].position, Quaternion.identity);
+}
 
     public void EnemyKilled()
     {
@@ -93,16 +108,12 @@ public class WaveManager : MonoBehaviour
         if (enemiesAlive <= 0 && waveInProgress)
         {
             waveInProgress = false;
-            
-            // Vérifier si le boss vient d'être vaincu (wave 10)
-            if (currentWave == 10)
-            {
+
+            int waveIndex = Mathf.Clamp(currentWave - 1, 0, waves.Length - 1);
+            if (waves[waveIndex].spawnBoss)
                 GameWon();
-            }
             else
-            {
                 Invoke(nameof(NextWave), 2f);
-            }
         }
     }
 
@@ -130,16 +141,27 @@ void NextWave()
     }
 }
 
-    IEnumerator SpawnWave()
-{
-    enemiesAlive = enemiesPerWave;
-
-    for (int i = 0; i < enemiesPerWave; i++)
+    IEnumerator SpawnWave(WaveData data)
     {
-        SpawnEnemy();
-        yield return new WaitForSeconds(1f);
+        // Mélanger l'ordre : goblins puis zombies dans un tableau shufflé
+        int total = data.goblinCount + data.zombieCount;
+        GameObject[] queue = new GameObject[total];
+        for (int i = 0; i < data.goblinCount; i++) queue[i] = enemyPrefab;
+        for (int i = data.goblinCount; i < total; i++) queue[i] = zombiePrefab != null ? zombiePrefab : enemyPrefab;
+
+        // Shuffle
+        for (int i = total - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            (queue[i], queue[j]) = (queue[j], queue[i]);
+        }
+
+        for (int i = 0; i < total; i++)
+        {
+            SpawnEnemy(queue[i]);
+            yield return new WaitForSeconds(1f);
+        }
     }
-}
 
     /// <summary>
     /// Spawn le boss pour la vague 10
