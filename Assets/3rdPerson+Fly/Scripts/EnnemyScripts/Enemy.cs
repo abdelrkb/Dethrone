@@ -144,6 +144,8 @@ public class Enemy : MonoBehaviour
                 transform.rotation = Quaternion.LookRotation(direction);
         }
 
+        FlashAttackWarning();
+
         isAttacking = true;
         if (agent != null) agent.isStopped = true;
         if (anim != null) anim.SetTrigger("attack");
@@ -163,6 +165,16 @@ public class Enemy : MonoBehaviour
     {
         isAttacking = false;
         if (agent != null && agent.enabled && agent.isOnNavMesh) agent.isStopped = false;
+    }
+
+    protected virtual void FlashAttackWarning()
+    {
+        if (allRenderers != null)
+        {
+            foreach (Renderer r in allRenderers)
+                r.material.color = new Color(1f, 0.5f, 0f); // orange
+            Invoke(nameof(ResetColor), 0.4f);
+        }
     }
 
     protected virtual void FlashRed()
